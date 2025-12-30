@@ -1,11 +1,10 @@
-import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
 FILE_NAME = "expenses.csv"
 
-# Function to load data
+# Load data function
 def load_data():
     if os.path.exists(FILE_NAME):
         return pd.read_csv(FILE_NAME)
@@ -16,44 +15,75 @@ def load_data():
 def save_data(df):
     df.to_csv(FILE_NAME, index=False)
 
-# Streamlit UI
-st.title("💰 Expense Tracker Web App")
-
-st.sidebar.header("Add New Expense")
-
-date = st.sidebar.date_input("Select Date")
-category = st.sidebar.text_input("Enter Category (Food, Travel, etc.)")
-amount = st.sidebar.number_input("Enter Amount", min_value=0.0, step=0.5)
-
-if st.sidebar.button("Add Expense"):
+# Add expense
+def add_expense(date, category, amount):
     df = load_data()
-    new_data = {"Date": date, "Category": category, "Amount": amount}
-    df = df.append(new_data, ignore_index=True)
+    new_row = {"Date": date, "Category": category, "Amount": amount}
+    df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
     save_data(df)
-    st.sidebar.success("Expense Added Successfully!")
+    print("Expense Added Successfully!")
 
-# Display Data
-st.subheader("📄 Expense Records")
-df = load_data()
+# Show all expenses
+def show_expenses():
+    df = load_data()
+    if df.empty:
+        print("No expenses recorded yet.")
+        return
+    print("\n📄 Expense Records")
+    print(df)
 
-if df.empty:
-    st.info("No expenses recorded yet. Add some!")
-else:
-    st.write(df)
+# Show summary & charts
+def show_summary():
+    df = load_data()
+    if df.empty:
+        print("No expenses available for summary.")
+        return
 
-    # Summary
-    st.subheader("📊 Expense Summary by Category")
     summary = df.groupby("Category")["Amount"].sum()
-
-    st.write(summary)
+    print("\n📊 Expense Summary by Category")
+    print(summary)
 
     # Pie Chart
-    st.subheader("🟠 Spending Distribution (Pie Chart)")
-    fig1, ax1 = plt.subplots()
-    ax1.pie(summary, labels=summary.index, autopct='%1.1f%%')
-    ax1.axis("equal")
-    st.pyplot(fig1)
+    plt.figure()
+    summary.plot.pie(autopct='%1.1f%%')
+    plt.title("Spending Distribution")
+    plt.axis("equal")
+    plt.show()
 
     # Bar Chart
-    st.subheader("🔵 Spending by Category (Bar Chart)")
-    st.bar_chart(summary)
+    plt.figure()
+    summary.plot(kind="bar")
+    plt.title("Spending by Category")
+    plt.ylabel("Amount")
+    plt.show()
+
+
+# ---- Simple CLI Menu ----
+while True:
+    print("\n--- Expense Tracker ---")
+    print("1. Add Expense")
+    print("2. View Expenses")
+    print("3. View Summary")
+    print("4. Exit")
+
+    choice = input("Enter choice: ")
+
+    if choice == "1":
+        date = input("Enter Date (YYYY-MM-DD): ")
+        category = input("Enter Category: ")
+        amount = float(input("Enter Amount: "))
+        add_expense(date, category, amount)
+
+    elif choice == "2":
+        show_expenses()
+
+    elif choice == "3":
+        show_summary()
+
+    elif choice == "4":
+        print("Exiting...")
+        break
+
+    else:
+        print("Invalid choice. Try again.")
+
