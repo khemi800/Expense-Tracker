@@ -1,0 +1,16 @@
+System Requirements - Expense Tracker (Non Streamlit Version)
+
+Python Version:
+Python 3.8+ (Recommended 3.10 or above)
+
+Required Python Libraries:
+pandas
+matplotlib
+
+Other Requirements:
+Basic OS support for reading/writing CSV files
+Internet NOT required
+Works on Windows / Linux / MacOS
+
+To Install Dependencies:
+pip install pandas matplotlib
